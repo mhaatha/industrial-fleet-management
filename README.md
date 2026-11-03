@@ -112,3 +112,32 @@ industrial-fleet-management/
 ├── README.md
 └── go.mod
 ```
+
+## 🛠️ Quick Start
+
+### Prerequisites
+* Go 1.22+
+* Docker & Docker Compose
+* Make (opsional)
+
+### Setup & Running Locally
+1. **Clone repository:**
+   ```bash
+   git clone https://github.com/your-username/industrial-fleet-management.git
+   cd industrial-fleet-management
+   ```
+
+2. **Salin environment file:**
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Jalankan infrastruktur (PostgreSQL & Redis):**
+   ```bash
+   docker compose up -d
+   ```
+
+4. **Jalankan aplikasi Go:**
+   ```bash
+   go run cmd/api/main.go
+   ```
