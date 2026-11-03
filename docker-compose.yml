@@ -1,0 +1,62 @@
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database Service
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:17.11-alpine3.24
+    container_name: fleet_postgres_dev
+    restart: unless-stopped # Kontainer otomatis restart kecuali dihentikan manual
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432" # Membuka port lokal agar bisa diakses dari aplikasi host (Go/DBeaver)
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Named volume agar data tetap aman saat kontainer dimatikan
+    networks:
+      - fleet-network
+    # Health check untuk memastikan database benar-benar siap menerima koneksi
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Redis Cache & Broker Service
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7.4.12-alpine
+    container_name: fleet_redis_dev
+    restart: unless-stopped
+    command: [
+      "redis-server",
+      "--appendonly", "yes" # Mengaktifkan AOF (Append Only File) untuk persistensi data dev yang andal
+    ]
+    ports:
+      - "6379:6379" # Port forwarding default Redis ke host
+    volumes:
+      - redisdata:/data # Named volume untuk menyimpan file persistensi Redis
+    networks:
+      - fleet-network
+    # Health check untuk memastikan Redis merespons perintah PING
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+# -----------------------------------------------------------------------------
+# Networks Configuration
+# -----------------------------------------------------------------------------
+networks:
+  fleet-network:
+    driver: bridge # Jaringan terisolasi agar kontainer bisa saling berkomunikasi via nama service
+
+# -----------------------------------------------------------------------------
+# Volumes Configuration
+# -----------------------------------------------------------------------------
+volumes:
+  pgdata:
+  redisdata:
