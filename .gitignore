@@ -1,1 +1,5 @@
-docs/*requirements.md
+docs/functional-requirements.md
+docs/non-functional-requirements.md
+docs/task-tracking.md
+
+.env
