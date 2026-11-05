@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/repository"
-	systemCheckWeb "github.com/mhaatha/industrial-fleet-management/internal/platform/health/web"
+	"github.com/mhaatha/industrial-fleet-management/internal/platform/web"
 	"github.com/redis/go-redis/v9"
 )
 
 // SystemCheckService is a contract interface for system checks.
 type SystemCheckService interface {
-	ReadinessCheck(ctx context.Context) (systemCheckWeb.SystemCheckResponse, error)
+	ReadinessCheck(ctx context.Context) (web.SystemCheckResponse, error)
 }
 
 // systemCheckService implements SystemCheckService interface
@@ -26,7 +26,7 @@ func NewSystemCheckService(systemCheckRepository repository.SystemCheckRepositor
 	}
 }
 
-func (s *systemCheckService) ReadinessCheck(ctx context.Context) (systemCheckWeb.SystemCheckResponse, error) {
+func (s *systemCheckService) ReadinessCheck(ctx context.Context) (web.SystemCheckResponse, error) {
 	checks := make(map[string]string)
 	isReady := true
 	status := "UP"
@@ -62,7 +62,7 @@ func (s *systemCheckService) ReadinessCheck(ctx context.Context) (systemCheckWeb
 		status = "DOWN"
 	}
 
-	return systemCheckWeb.SystemCheckResponse{
+	return web.SystemCheckResponse{
 		Status:    status,
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
 		Checks:    checks,

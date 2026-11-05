@@ -6,9 +6,8 @@ import (
 	"time"
 
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/service"
-	systemCheckWeb "github.com/mhaatha/industrial-fleet-management/internal/platform/health/web"
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/helper"
-	platformWeb "github.com/mhaatha/industrial-fleet-management/internal/platform/web"
+	"github.com/mhaatha/industrial-fleet-management/internal/platform/web"
 )
 
 type SystemCheckHandler struct {
@@ -22,9 +21,9 @@ func NewSystemCheckHandler(systemCheckService service.SystemCheckService) *Syste
 }
 
 func (h *SystemCheckHandler) HealthCheck(w http.ResponseWriter, r *http.Request) {
-	helper.WriteToResponseBody(w, http.StatusOK, platformWeb.WebSuccessResponse{
+	helper.WriteToResponseBody(w, http.StatusOK, web.WebSuccessResponse{
 		Message: "OK",
-		Data: systemCheckWeb.SystemCheckResponse{
+		Data: web.SystemCheckResponse{
 			Status:    "UP",
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
 		},
@@ -40,7 +39,7 @@ func (h *SystemCheckHandler) ReadinessCheck(w http.ResponseWriter, r *http.Reque
 
 	// ⚠️ IMPLEMENT ERROR HANDLING IF ONE OF THE SERVICE ARE UNAVAILABLE ⚠️
 
-	helper.WriteToResponseBody(w, http.StatusOK, platformWeb.WebSuccessResponse{
+	helper.WriteToResponseBody(w, http.StatusOK, web.WebSuccessResponse{
 		Message: "OK",
 		Data:    systemCheckResponse,
 	})
