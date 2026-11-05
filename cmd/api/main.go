@@ -1,19 +1,18 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"log"
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/config"
-	"github.com/mhaatha/industrial-fleet-management/internal/platform/health"
-	"github.com/redis/go-redis/v9"
+	"github.com/mhaatha/industrial-fleet-management/internal/platform/database"
+	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/handler"
+	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/repository"
+	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/service"
 )
 
 func main() {
@@ -27,27 +26,35 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Database init
+	db, err := database.ConnectDB(cfg)
+	if err != nil {
+		slog.Error("failed connect to database", "err", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
 	// Main router
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	ctx := context.Background()
+	// System check init
+	systemCheckRepository := repository.NewSystemCheckRepository(db)
+	systemCheckService := service.NewSystemCheckService(systemCheckRepository)
+	systemCheckHandler := handler.NewSystemCheckHandler(systemCheckService)
+	handler.SystemCheckRouter(r, systemCheckHandler)
 
-	pgURL := fmt.Sprintf("postgres://%s:%s@localhost:5432/%s", cfg.DBUser, cfg.DBPassword, cfg.DBName)
-	pool, err := pgxpool.New(ctx, pgURL)
-	if err != nil {
-		log.Fatalf("Gagal terhubung ke PostgreSQL: %v", err)
+	// Server init
+	server := http.Server{
+		Addr:    ":" + cfg.ServerPort,
+		Handler: r,
 	}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
-	defer rdb.Close()
+	// ⚠️ GRACEFUL SHUTDOWN WILL BE IMPLEMENTED ⚠️
 
-	systemCheckHandler := health.NewSystemCheckHandler(pool, rdb)
-	health.SystemCheckRouter(r, systemCheckHandler)
-
-	http.ListenAndServe(":3000", r)
+	slog.Info("starting server on :" + cfg.ServerPort)
+	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+		slog.Error("HTTP server error", "err", err)
+		os.Exit(1)
+	}
 }
