@@ -17,17 +17,24 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	if err := godotenv.Load("../../.env"); err != nil {
+	if err := godotenv.Load(); err != nil {
 		return nil, err
 	}
 
 	slog.Info("env loaded successfully")
 
 	return &Config{
-		AppEnv:     os.Getenv("APP_ENV"),
-		ServerPort: os.Getenv("SERVER_PORT"),
-		DBName:     os.Getenv("DB_NAME"),
-		DBUser:     os.Getenv("DB_USER"),
-		DBPassword: os.Getenv("DB_PASSWORD"),
+		AppEnv:     getEnv("APP_ENV", "development"),
+		ServerPort: getEnv("SERVER_PORT", "8080"),
+		DBName:     getEnv("DB_NAME", ""),
+		DBUser:     getEnv("DB_USER", ""),
+		DBPassword: getEnv("DB_PASSWORD", ""),
 	}, nil
+}
+
+func getEnv(key, fallback string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return fallback
 }
