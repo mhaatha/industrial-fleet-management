@@ -14,6 +14,7 @@ type Config struct {
 	DBName     string
 	DBUser     string
 	DBPassword string
+	DBHost     string
 }
 
 func LoadConfig() (*Config, error) {
@@ -29,6 +30,7 @@ func LoadConfig() (*Config, error) {
 		DBName:     getEnv("DB_NAME", ""),
 		DBUser:     getEnv("DB_USER", ""),
 		DBPassword: getEnv("DB_PASSWORD", ""),
+		DBHost:     getEnv("DB_HOST", "localhost"),
 	}, nil
 }
 
