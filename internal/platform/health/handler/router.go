@@ -3,11 +3,11 @@ package handler
 import "github.com/go-chi/chi/v5"
 
 func SystemCheckRouter(r chi.Router, h *SystemCheckHandler) {
-	r.Route("/api/v1/health", func(r chi.Router) {
+	r.Route("/health", func(r chi.Router) {
 		r.Get("/", h.HealthCheck)
 	})
 
-	r.Route("/api/v1/ready", func(r chi.Router) {
+	r.Route("/ready", func(r chi.Router) {
 		r.Get("/", h.ReadinessCheck)
 	})
 }
