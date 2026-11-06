@@ -2,26 +2,41 @@ package database
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/config"
 )
 
 func ConnectDB(cfg *config.Config) (*pgxpool.Pool, error) {
-	pgURL := fmt.Sprintf("postgres://%s:%s@localhost:5432/%s", cfg.DBUser, cfg.DBPassword, cfg.DBName)
-	db, err := pgxpool.New(context.Background(), pgURL)
+	config, err := pgxpool.ParseConfig("")
 	if err != nil {
 		return nil, err
 	}
 
+	config.ConnConfig.User = cfg.DBUser
+	config.ConnConfig.Password = cfg.DBPassword
+	config.ConnConfig.Host = cfg.DBUser
+	config.ConnConfig.Database = cfg.DBHost
+
+	config.MaxConns = 20
+	config.MinConns = 5
+	config.MaxConnIdleTime = 30 * time.Minute
+	config.MaxConnLifetime = 1 * time.Hour
+
+	pool, err := pgxpool.NewWithConfig(context.Background(), config)
+	if err != nil {
+		return nil, err
+	}
+	defer pool.Close()
+
 	// Check DB connection
-	err = db.Ping(context.Background())
+	err = pool.Ping(context.Background())
 	if err != nil {
 		return nil, err
 	}
 
 	slog.Info("connected to the database")
-	return db, nil
+	return pool, nil
 }
