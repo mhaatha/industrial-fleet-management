@@ -34,15 +34,15 @@ func (h *SystemCheckHandler) ReadinessCheck(w http.ResponseWriter, r *http.Reque
 	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
 	defer cancel()
 
-	// Error ignored because we don't implemented the error handling yet
 	systemCheckResponse := h.SystemCheckService.ReadinessCheck(ctx)
 
-	// ⚠️ IMPLEMENT ERROR HANDLING IF ONE OF THE SERVICE ARE UNAVAILABLE ⚠️
-	// if systemCheckResponse.Checks["postgres"] == "" || systemCheckResponse.Checks["redis"] == "" {
-	// 	helper.WriteToResponseBody(w, http.StatusServiceUnavailable, web.WebFailedResponse{
-	// 		Errors: "error",
-	// 	})
-	// }
+	if systemCheckResponse.Checks["postgres"] == "DOWN" || systemCheckResponse.Checks["redis"] == "DOWN" {
+		helper.WriteToResponseBody(w, http.StatusServiceUnavailable, web.WebFailedResponse{
+			Message: "Some service are unavailable, please try again later.",
+			Details: systemCheckResponse,
+		})
+		return
+	}
 
 	helper.WriteToResponseBody(w, http.StatusOK, web.WebSuccessResponse{
 		Message: "OK",
