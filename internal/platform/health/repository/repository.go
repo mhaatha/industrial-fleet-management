@@ -10,17 +10,19 @@ import (
 // SystemCheckRepository is a contract interface for system checks.
 type SystemCheckRepository interface {
 	CheckPostgresql(ctx context.Context) error
-	CheckRedis(ctx context.Context, rdb *redis.Client) error
+	CheckRedis(ctx context.Context) error
 }
 
 // systemCheckRepository implements SystemCheckRepository interface
 type systemCheckRepository struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	rdb *redis.Client
 }
 
-func NewSystemCheckRepository(db *pgxpool.Pool) SystemCheckRepository {
+func NewSystemCheckRepository(db *pgxpool.Pool, rdb *redis.Client) SystemCheckRepository {
 	return &systemCheckRepository{
-		db: db,
+		db:  db,
+		rdb: rdb,
 	}
 }
 
@@ -31,8 +33,8 @@ func (r *systemCheckRepository) CheckPostgresql(ctx context.Context) error {
 	return nil
 }
 
-func (r *systemCheckRepository) CheckRedis(ctx context.Context, rdb *redis.Client) error {
-	if err := rdb.Ping(ctx).Err(); err != nil {
+func (r *systemCheckRepository) CheckRedis(ctx context.Context) error {
+	if err := r.rdb.Ping(ctx).Err(); err != nil {
 		return err
 	}
 	return nil

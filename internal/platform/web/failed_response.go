@@ -1,5 +1,6 @@
 package web
 
 type WebFailedResponse struct {
-	Errors interface{} `json:"errors"`
+	Message string      `json:"message"`
+	Details interface{} `json:"details,omitempty"`
 }

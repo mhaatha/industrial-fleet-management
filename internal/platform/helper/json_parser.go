@@ -29,7 +29,8 @@ func WriteToResponseBody(w http.ResponseWriter, statusCode int, response interfa
 		w.WriteHeader(http.StatusInternalServerError)
 
 		fallback := web.WebFailedResponse{
-			Errors: http.StatusText(http.StatusInternalServerError),
+			Message: "The page you are looking for cannot be displayed because of an internal server error.",
+			Details: http.StatusText(http.StatusInternalServerError),
 		}
 
 		json.NewEncoder(w).Encode(fallback)

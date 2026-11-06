@@ -13,6 +13,7 @@ import (
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/handler"
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/repository"
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/service"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
@@ -34,12 +35,20 @@ func main() {
 	}
 	defer db.Close()
 
+	// Redis init
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+	defer rdb.Close()
+
 	// Main router
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
 	// System check init
-	systemCheckRepository := repository.NewSystemCheckRepository(db)
+	systemCheckRepository := repository.NewSystemCheckRepository(db, rdb)
 	systemCheckService := service.NewSystemCheckService(systemCheckRepository)
 	systemCheckHandler := handler.NewSystemCheckHandler(systemCheckService)
 	handler.SystemCheckRouter(r, systemCheckHandler)

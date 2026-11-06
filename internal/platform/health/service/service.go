@@ -7,12 +7,11 @@ import (
 
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/repository"
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/web"
-	"github.com/redis/go-redis/v9"
 )
 
 // SystemCheckService is a contract interface for system checks.
 type SystemCheckService interface {
-	ReadinessCheck(ctx context.Context) (web.SystemCheckResponse, error)
+	ReadinessCheck(ctx context.Context) web.SystemCheckResponse
 }
 
 // systemCheckService implements SystemCheckService interface
@@ -26,7 +25,7 @@ func NewSystemCheckService(systemCheckRepository repository.SystemCheckRepositor
 	}
 }
 
-func (s *systemCheckService) ReadinessCheck(ctx context.Context) (web.SystemCheckResponse, error) {
+func (s *systemCheckService) ReadinessCheck(ctx context.Context) web.SystemCheckResponse {
 	checks := make(map[string]string)
 	isReady := true
 	status := "UP"
@@ -41,15 +40,8 @@ func (s *systemCheckService) ReadinessCheck(ctx context.Context) (web.SystemChec
 		checks["postgres"] = "UP"
 	}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
-	defer rdb.Close()
-
 	// Call check Redis repository
-	if err := s.SystemCheckRepository.CheckRedis(ctx, rdb); err != nil {
+	if err := s.SystemCheckRepository.CheckRedis(ctx); err != nil {
 		slog.Error("redis health check failed", "err", err)
 
 		checks["redis"] = "DOWN"
@@ -66,5 +58,5 @@ func (s *systemCheckService) ReadinessCheck(ctx context.Context) (web.SystemChec
 		Status:    status,
 		Timestamp: time.Now().UTC().Format(time.RFC3339),
 		Checks:    checks,
-	}, nil
+	}
 }
