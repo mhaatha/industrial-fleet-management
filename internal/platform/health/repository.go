@@ -1,4 +1,4 @@
-package repository
+package health
 
 import (
 	"context"

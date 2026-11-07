@@ -1,11 +1,10 @@
-package service
+package health
 
 import (
 	"context"
 	"log/slog"
 	"time"
 
-	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/repository"
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/web"
 )
 
@@ -16,10 +15,10 @@ type SystemCheckService interface {
 
 // systemCheckService implements SystemCheckService interface
 type systemCheckService struct {
-	SystemCheckRepository repository.SystemCheckRepository
+	SystemCheckRepository SystemCheckRepository
 }
 
-func NewSystemCheckService(systemCheckRepository repository.SystemCheckRepository) SystemCheckService {
+func NewSystemCheckService(systemCheckRepository SystemCheckRepository) SystemCheckService {
 	return &systemCheckService{
 		SystemCheckRepository: systemCheckRepository,
 	}

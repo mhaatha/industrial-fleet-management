@@ -1,20 +1,19 @@
-package handler
+package health
 
 import (
 	"context"
 	"net/http"
 	"time"
 
-	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/service"
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/helper"
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/web"
 )
 
 type SystemCheckHandler struct {
-	SystemCheckService service.SystemCheckService
+	SystemCheckService SystemCheckService
 }
 
-func NewSystemCheckHandler(systemCheckService service.SystemCheckService) *SystemCheckHandler {
+func NewSystemCheckHandler(systemCheckService SystemCheckService) *SystemCheckHandler {
 	return &SystemCheckHandler{
 		SystemCheckService: systemCheckService,
 	}
