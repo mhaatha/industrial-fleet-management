@@ -29,7 +29,6 @@ func ConnectDB(cfg *config.Config) (*pgxpool.Pool, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer pool.Close()
 
 	// Check DB connection
 	err = pool.Ping(context.Background())
