@@ -2,15 +2,11 @@ package health
 
 import (
 	"context"
-	"log/slog"
-	"time"
-
-	"github.com/mhaatha/industrial-fleet-management/internal/platform/web"
 )
 
 // SystemCheckService is a contract interface for system checks.
 type SystemCheckService interface {
-	ReadinessCheck(ctx context.Context) web.SystemCheckResponse
+	ReadinessCheck(ctx context.Context) (map[string]string, bool)
 }
 
 // systemCheckService implements SystemCheckService interface
@@ -24,15 +20,12 @@ func NewSystemCheckService(systemCheckRepository SystemCheckRepository) SystemCh
 	}
 }
 
-func (s *systemCheckService) ReadinessCheck(ctx context.Context) web.SystemCheckResponse {
+func (s *systemCheckService) ReadinessCheck(ctx context.Context) (map[string]string, bool) {
 	checks := make(map[string]string)
 	isReady := true
-	status := "UP"
 
 	// Call check Postgres repository
 	if err := s.SystemCheckRepository.CheckPostgresql(ctx); err != nil {
-		slog.Error("postgres health check failed", "err", err)
-
 		checks["postgres"] = "DOWN"
 		isReady = false
 	} else {
@@ -41,21 +34,11 @@ func (s *systemCheckService) ReadinessCheck(ctx context.Context) web.SystemCheck
 
 	// Call check Redis repository
 	if err := s.SystemCheckRepository.CheckRedis(ctx); err != nil {
-		slog.Error("redis health check failed", "err", err)
-
 		checks["redis"] = "DOWN"
 		isReady = false
 	} else {
 		checks["redis"] = "UP"
 	}
 
-	if !isReady {
-		status = "DOWN"
-	}
-
-	return web.SystemCheckResponse{
-		Status:    status,
-		Timestamp: time.Now().UTC().Format(time.RFC3339),
-		Checks:    checks,
-	}
+	return checks, isReady
 }

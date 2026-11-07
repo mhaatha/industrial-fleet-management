@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/mhaatha/industrial-fleet-management/internal/platform/apperror"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -28,14 +29,14 @@ func NewSystemCheckRepository(db *pgxpool.Pool, rdb *redis.Client) SystemCheckRe
 
 func (r *systemCheckRepository) CheckPostgresql(ctx context.Context) error {
 	if err := r.db.Ping(ctx); err != nil {
-		return err
+		return apperror.ServiceUnavailable("postgres health check failed").WithErr(err)
 	}
 	return nil
 }
 
 func (r *systemCheckRepository) CheckRedis(ctx context.Context) error {
 	if err := r.rdb.Ping(ctx).Err(); err != nil {
-		return err
+		return apperror.ServiceUnavailable("redis health check failed").WithErr(err)
 	}
 	return nil
 }

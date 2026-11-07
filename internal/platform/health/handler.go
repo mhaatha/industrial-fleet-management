@@ -33,18 +33,28 @@ func (h *SystemCheckHandler) ReadinessCheck(w http.ResponseWriter, r *http.Reque
 	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
 	defer cancel()
 
-	systemCheckResponse := h.SystemCheckService.ReadinessCheck(ctx)
+	checks, ready := h.SystemCheckService.ReadinessCheck(ctx)
 
-	if systemCheckResponse.Checks["postgres"] == "DOWN" || systemCheckResponse.Checks["redis"] == "DOWN" {
-		helper.WriteToResponseBody(w, http.StatusServiceUnavailable, web.WebFailedResponse{
-			Message: "Some service are unavailable, please try again later.",
-			Details: systemCheckResponse,
+	status, httpStatus, message := "UP", http.StatusOK, "OK"
+	if !ready {
+		status, httpStatus, message = "DOWN", http.StatusServiceUnavailable, "Some services are unavailable."
+
+		helper.WriteToResponseBody(w, httpStatus, web.WebFailedResponse{
+			Message: message,
+			Details: web.SystemCheckResponse{
+				Status:    status,
+				Timestamp: time.Now().UTC().Format(time.RFC3339),
+				Checks:    checks,
+			},
 		})
-		return
+	} else {
+		helper.WriteToResponseBody(w, httpStatus, web.WebSuccessResponse{
+			Message: message,
+			Data: web.SystemCheckResponse{
+				Status:    status,
+				Timestamp: time.Now().UTC().Format(time.RFC3339),
+				Checks:    checks,
+			},
+		})
 	}
-
-	helper.WriteToResponseBody(w, http.StatusOK, web.WebSuccessResponse{
-		Message: "OK",
-		Data:    systemCheckResponse,
-	})
 }
