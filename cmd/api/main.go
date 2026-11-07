@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -33,7 +37,6 @@ func main() {
 		slog.Error("failed connect to database", "err", err)
 		os.Exit(1)
 	}
-	defer db.Close()
 
 	// Redis init
 	rdb := redis.NewClient(&redis.Options{
@@ -41,7 +44,6 @@ func main() {
 		Password: "",
 		DB:       0,
 	})
-	defer rdb.Close()
 
 	// Main router
 	r := chi.NewRouter()
@@ -59,11 +61,39 @@ func main() {
 		Handler: r,
 	}
 
-	// ⚠️ GRACEFUL SHUTDOWN WILL BE IMPLEMENTED ⚠️
+	// Server goroutine
+	serverErr := make(chan error, 1)
+	go func() {
+		slog.Info("starting server on :" + cfg.ServerPort)
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			serverErr <- err
+		}
+	}()
 
-	slog.Info("starting server on :" + cfg.ServerPort)
-	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	// Block until it receives SIGINT or SIGTERM
+	select {
+	case err := <-serverErr:
 		slog.Error("HTTP server error", "err", err)
 		os.Exit(1)
+	case <-ctx.Done():
+		slog.Info("signal received, begin graceful shutdown")
 	}
+
+	// Shutdown with timeout
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		slog.Error("incomplete shutdown", "err", err)
+		server.Close()
+	}
+
+	db.Close()
+	if err := rdb.Close(); err != nil {
+		slog.Error("failed to close redis conn", "err", err)
+	}
+	slog.Info("graceful shutdown success")
 }
