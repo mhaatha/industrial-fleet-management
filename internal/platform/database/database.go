@@ -17,8 +17,8 @@ func ConnectDB(cfg *config.Config) (*pgxpool.Pool, error) {
 
 	config.ConnConfig.User = cfg.DBUser
 	config.ConnConfig.Password = cfg.DBPassword
-	config.ConnConfig.Host = cfg.DBUser
-	config.ConnConfig.Database = cfg.DBHost
+	config.ConnConfig.Host = cfg.DBHost
+	config.ConnConfig.Database = cfg.DBName
 
 	config.MaxConns = 20
 	config.MinConns = 5
