@@ -14,9 +14,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/config"
 	"github.com/mhaatha/industrial-fleet-management/internal/platform/database"
-	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/handler"
-	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/repository"
-	"github.com/mhaatha/industrial-fleet-management/internal/platform/health/service"
+	"github.com/mhaatha/industrial-fleet-management/internal/platform/health"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -50,10 +48,10 @@ func main() {
 	r.Use(middleware.Logger)
 
 	// System check init
-	systemCheckRepository := repository.NewSystemCheckRepository(db, rdb)
-	systemCheckService := service.NewSystemCheckService(systemCheckRepository)
-	systemCheckHandler := handler.NewSystemCheckHandler(systemCheckService)
-	handler.SystemCheckRouter(r, systemCheckHandler)
+	systemCheckRepository := health.NewSystemCheckRepository(db, rdb)
+	systemCheckService := health.NewSystemCheckService(systemCheckRepository)
+	systemCheckHandler := health.NewSystemCheckHandler(systemCheckService)
+	health.SystemCheckRouter(r, systemCheckHandler)
 
 	// Server init
 	server := http.Server{
