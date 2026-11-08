@@ -15,6 +15,12 @@ type Config struct {
 	DBUser     string
 	DBPassword string
 	DBHost     string
+	DBPort     string
+
+	RedisHost     string
+	RedisPort     string
+	RedisPassword string
+	RedisDB       string
 }
 
 func LoadConfig() (*Config, error) {
@@ -25,12 +31,17 @@ func LoadConfig() (*Config, error) {
 	slog.Info("env loaded successfully")
 
 	return &Config{
-		AppEnv:     getEnv("APP_ENV", "development"),
-		ServerPort: getEnv("SERVER_PORT", "8080"),
-		DBName:     getEnv("DB_NAME", ""),
-		DBUser:     getEnv("DB_USER", ""),
-		DBPassword: getEnv("DB_PASSWORD", ""),
-		DBHost:     getEnv("DB_HOST", "localhost"),
+		AppEnv:        getEnv("APP_ENV", "development"),
+		ServerPort:    getEnv("SERVER_PORT", "8080"),
+		DBName:        getEnv("DB_NAME", ""),
+		DBUser:        getEnv("DB_USER", ""),
+		DBPassword:    getEnv("DB_PASSWORD", ""),
+		DBHost:        getEnv("DB_HOST", "localhost"),
+		DBPort:        getEnv("DB_PORT", "5432"),
+		RedisHost:     getEnv("REDIS_HOST", "localhost"),
+		RedisPort:     getEnv("REDIS_PORT", "6379"),
+		RedisPassword: getEnv("REDIS_PASSWORD", ""),
+		RedisDB:       getEnv("REDIS_DB", "0"),
 	}, nil
 }
 
