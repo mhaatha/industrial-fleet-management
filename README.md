@@ -116,7 +116,7 @@ industrial-fleet-management/
 ## 🛠️ Quick Start
 
 ### Prerequisites
-* Go 1.22+
+* Go 1.27+
 * Docker & Docker Compose
 * Make (opsional)
 
