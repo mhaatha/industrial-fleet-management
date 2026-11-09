@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -38,9 +39,9 @@ func main() {
 
 	// Redis init
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
+		Addr:     net.JoinHostPort(cfg.RedisHost, cfg.RedisPort),
+		Password: cfg.RedisPassword,
+		DB:       cfg.RedisDB,
 	})
 
 	// Main router
