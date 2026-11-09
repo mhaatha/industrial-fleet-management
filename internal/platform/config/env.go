@@ -3,6 +3,7 @@ package config
 import (
 	"log/slog"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -20,7 +21,7 @@ type Config struct {
 	RedisHost     string
 	RedisPort     string
 	RedisPassword string
-	RedisDB       string
+	RedisDB       int
 }
 
 func LoadConfig() (*Config, error) {
@@ -31,23 +32,32 @@ func LoadConfig() (*Config, error) {
 	slog.Info("env loaded successfully")
 
 	return &Config{
-		AppEnv:        getEnv("APP_ENV", "development"),
-		ServerPort:    getEnv("SERVER_PORT", "8080"),
-		DBName:        getEnv("DB_NAME", ""),
-		DBUser:        getEnv("DB_USER", ""),
-		DBPassword:    getEnv("DB_PASSWORD", ""),
-		DBHost:        getEnv("DB_HOST", "localhost"),
-		DBPort:        getEnv("DB_PORT", "5432"),
-		RedisHost:     getEnv("REDIS_HOST", "localhost"),
-		RedisPort:     getEnv("REDIS_PORT", "6379"),
-		RedisPassword: getEnv("REDIS_PASSWORD", ""),
-		RedisDB:       getEnv("REDIS_DB", "0"),
+		AppEnv:        getEnvString("APP_ENV", "development"),
+		ServerPort:    getEnvString("SERVER_PORT", "8080"),
+		DBName:        getEnvString("DB_NAME", ""),
+		DBUser:        getEnvString("DB_USER", ""),
+		DBPassword:    getEnvString("DB_PASSWORD", ""),
+		DBHost:        getEnvString("DB_HOST", "localhost"),
+		DBPort:        getEnvString("DB_PORT", "5432"),
+		RedisHost:     getEnvString("REDIS_HOST", "localhost"),
+		RedisPort:     getEnvString("REDIS_PORT", "6379"),
+		RedisPassword: getEnvString("REDIS_PASSWORD", ""),
+		RedisDB:       getEnvInt("REDIS_DB", 0),
 	}, nil
 }
 
-func getEnv(key, fallback string) string {
+func getEnvString(key, fallback string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value
+	}
+	return fallback
+}
+
+func getEnvInt(key string, fallback int) int {
+	if value, exists := os.LookupEnv(key); exists {
+		res, _ := strconv.Atoi(value)
+
+		return res
 	}
 	return fallback
 }
