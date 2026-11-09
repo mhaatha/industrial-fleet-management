@@ -26,8 +26,6 @@ func WriteToResponseBody(w http.ResponseWriter, statusCode int, response interfa
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		slog.Error("failed to encode response body", "err", err)
 
-		w.WriteHeader(http.StatusInternalServerError)
-
 		fallback := web.WebFailedResponse{
 			Message: "The page you are looking for cannot be displayed because of an internal server error.",
 			Details: http.StatusText(http.StatusInternalServerError),
