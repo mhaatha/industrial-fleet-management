@@ -57,11 +57,11 @@ func TestReadinessCheck(t *testing.T) {
 			checks, isReady := service.ReadinessCheck(context.Background())
 
 			if !reflect.DeepEqual(checks, tt.checks) {
-				t.Errorf("Expected checks to be equal, but got %v want %v", checks, tt.checks)
+				t.Errorf("expected checks to be equal, but got %v want %v", checks, tt.checks)
 			}
 
 			if isReady != tt.isReady {
-				t.Errorf("Expected isReady to be equal, but got %v, want %v", isReady, tt.isReady)
+				t.Errorf("expected isReady to be equal, but got %v, want %v", isReady, tt.isReady)
 			}
 		})
 	}
