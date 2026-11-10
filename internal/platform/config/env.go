@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -35,11 +36,11 @@ func LoadConfig() (*Config, error) {
 	return &Config{
 		AppEnv:        getEnvString("APP_ENV", "development"),
 		ServerPort:    getEnvString("SERVER_PORT", "8080"),
-		DBName:        getEnvString("DB_NAME", ""),
-		DBUser:        getEnvString("DB_USER", ""),
-		DBPassword:    getEnvString("DB_PASSWORD", ""),
-		DBHost:        getEnvString("DB_HOST", "localhost"),
-		DBPort:        getEnvInt("DB_PORT", 5432),
+		DBName:        getEnvString("POSTGRES_DB", ""),
+		DBUser:        getEnvString("POSTGRES_USER", ""),
+		DBPassword:    getEnvString("POSTGRES_PASSWORD", ""),
+		DBHost:        getEnvString("POSTGRES_HOST", "localhost"),
+		DBPort:        getEnvInt("POSTGRES_PORT", 5432),
 		RedisHost:     getEnvString("REDIS_HOST", "localhost"),
 		RedisPort:     getEnvString("REDIS_PORT", "6379"),
 		RedisPassword: getEnvString("REDIS_PASSWORD", ""),
@@ -49,6 +50,13 @@ func LoadConfig() (*Config, error) {
 
 func getEnvString(key, fallback string) string {
 	if value, exists := os.LookupEnv(key); exists {
+		if key == "POSTGRES_DB" || key == "POSTGRES_USER" {
+			if value == "" {
+				slog.Error("invalid configuration value", "err", fmt.Sprintf("%v can not empty", key))
+				os.Exit(1)
+			}
+		}
+
 		return value
 	}
 	return fallback
@@ -63,7 +71,7 @@ func getEnvInt(key string, fallback int) int {
 		}
 
 		// Port validation (recommendation: 1024 - 65535)
-		if res < 1024 || res > 65535 {
+		if strings.Contains(key, "PORT") && (res < 1024 || res > 65535) {
 			slog.Error("invalid port value", "err", fmt.Sprintf("port %v is not safe, recommended port are 1024 - 65535", res))
 			os.Exit(1)
 		}
