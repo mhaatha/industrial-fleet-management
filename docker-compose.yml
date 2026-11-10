@@ -7,9 +7,9 @@ services:
     container_name: fleet_postgres_dev
     restart: unless-stopped # Kontainer otomatis restart kecuali dihentikan manual
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432" # Membuka port lokal agar bisa diakses dari aplikasi host (Go/DBeaver)
     volumes:
@@ -18,7 +18,7 @@ services:
       - fleet-network
     # Health check untuk memastikan database benar-benar siap menerima koneksi
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
