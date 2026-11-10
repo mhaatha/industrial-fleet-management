@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"strconv"
@@ -16,7 +17,7 @@ type Config struct {
 	DBUser     string
 	DBPassword string
 	DBHost     string
-	DBPort     string
+	DBPort     int
 
 	RedisHost     string
 	RedisPort     string
@@ -25,11 +26,11 @@ type Config struct {
 }
 
 func LoadConfig() (*Config, error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, err
+	if os.Getenv("APP_ENV") != "production" {
+		if err := godotenv.Load(); err != nil {
+			return nil, err
+		}
 	}
-
-	slog.Info("env loaded successfully")
 
 	return &Config{
 		AppEnv:        getEnvString("APP_ENV", "development"),
@@ -38,7 +39,7 @@ func LoadConfig() (*Config, error) {
 		DBUser:        getEnvString("DB_USER", ""),
 		DBPassword:    getEnvString("DB_PASSWORD", ""),
 		DBHost:        getEnvString("DB_HOST", "localhost"),
-		DBPort:        getEnvString("DB_PORT", "5432"),
+		DBPort:        getEnvInt("DB_PORT", 5432),
 		RedisHost:     getEnvString("REDIS_HOST", "localhost"),
 		RedisPort:     getEnvString("REDIS_PORT", "6379"),
 		RedisPassword: getEnvString("REDIS_PASSWORD", ""),
@@ -55,7 +56,23 @@ func getEnvString(key, fallback string) string {
 
 func getEnvInt(key string, fallback int) int {
 	if value, exists := os.LookupEnv(key); exists {
-		res, _ := strconv.Atoi(value)
+		res, err := strconv.Atoi(value)
+		if err != nil {
+			slog.Error("invalid configuration value", "err", fmt.Sprintf("%v is not a valid %v", value, key))
+			os.Exit(1)
+		}
+
+		// Port validation (recommendation: 1024 - 65535)
+		if res < 1024 || res > 65535 {
+			slog.Error("invalid port value", "err", fmt.Sprintf("port %v is not safe, recommended port are 1024 - 65535", res))
+			os.Exit(1)
+		}
+
+		// Redis DB value validation
+		if key == "REDIS_DB" && (res < 0 || res > 15) {
+			slog.Error("invalid redis db value", "err", fmt.Sprintf("%v is not a valid redis db (use 0-15)", res))
+			os.Exit(1)
+		}
 
 		return res
 	}
