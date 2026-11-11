@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -28,7 +29,7 @@ type Config struct {
 
 func LoadConfig() (*Config, error) {
 	if os.Getenv("APP_ENV") != "production" {
-		if err := godotenv.Load(); err != nil {
+		if err := godotenv.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
 			return nil, err
 		}
 	}
