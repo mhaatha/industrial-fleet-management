@@ -22,13 +22,15 @@ import (
 func main() {
 	// Config init
 	cfg, err := config.LoadConfig()
-	if err != nil {
-		slog.Error("error occures while calling LoadConfig", "err", err)
-		os.Exit(1)
-	}
-
 	// Logger init
 	config.LogInit()
+
+	// Check the error after LogInit so it will print the slog.Error based on the APP_ENV
+	// Since LogInit doesn't need values from cfg, it's safe to do this
+	if err != nil {
+		slog.Error("error occurs while calling LoadConfig", "err", err)
+		os.Exit(1)
+	}
 
 	// Database init
 	db, err := database.ConnectDB(cfg)

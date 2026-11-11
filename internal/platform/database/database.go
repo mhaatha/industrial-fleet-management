@@ -15,11 +15,11 @@ func ConnectDB(cfg *config.Config) (*pgxpool.Pool, error) {
 		return nil, err
 	}
 
-	config.ConnConfig.User = cfg.DBUser
-	config.ConnConfig.Password = cfg.DBPassword
-	config.ConnConfig.Host = cfg.DBHost
-	config.ConnConfig.Database = cfg.DBName
-	config.ConnConfig.Port = uint16(cfg.DBPort)
+	config.ConnConfig.User = cfg.PostgresUser
+	config.ConnConfig.Password = cfg.PostgresPassword
+	config.ConnConfig.Host = cfg.PostgresHost
+	config.ConnConfig.Database = cfg.PostgresDB
+	config.ConnConfig.Port = uint16(cfg.PostgresPort)
 
 	config.MaxConns = 20
 	config.MinConns = 5
