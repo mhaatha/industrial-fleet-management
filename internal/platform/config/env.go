@@ -21,7 +21,7 @@ type Config struct {
 	PostgresPort     int
 
 	RedisHost     string
-	RedisPort     string
+	RedisPort     int
 	RedisPassword string
 	RedisDB       int
 }
@@ -92,7 +92,7 @@ func LoadConfig() (*Config, error) {
 		redisHostErr = fmt.Errorf("failed to get REDIS_HOST: %w", err)
 	}
 
-	redisPort, err := getEnvString("REDIS_PORT", "6379")
+	redisPort, err := getEnvInt("REDIS_PORT", 6379)
 	var redisPortErr error
 	if err != nil {
 		isError = true
