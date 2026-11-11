@@ -59,14 +59,14 @@ func main() {
 
 	// Server init
 	server := http.Server{
-		Addr:    ":" + cfg.ServerPort,
+		Addr:    ":" + strconv.Itoa(cfg.ServerPort),
 		Handler: r,
 	}
 
 	// Server goroutine
 	serverErr := make(chan error, 1)
 	go func() {
-		slog.Info("starting server on :" + cfg.ServerPort)
+		slog.Info("starting server on :" + strconv.Itoa(cfg.ServerPort))
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			serverErr <- err
 		}

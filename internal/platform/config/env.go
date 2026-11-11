@@ -12,7 +12,7 @@ import (
 
 type Config struct {
 	AppEnv     string
-	ServerPort string
+	ServerPort int
 
 	PostgresDB       string
 	PostgresUser     string
@@ -43,7 +43,7 @@ func LoadConfig() (*Config, error) {
 		appEnvErr = fmt.Errorf("failed to get APP_ENV: %w", err)
 	}
 
-	serverPort, err := getEnvString("SERVER_PORT", "8080")
+	serverPort, err := getEnvInt("SERVER_PORT", 8080)
 	var serverPortErr error
 	if err != nil {
 		isError = true
