@@ -20,15 +20,15 @@ import (
 )
 
 func main() {
-	// Logger init
-	config.LogInit()
-
 	// Config init
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		slog.Error("error occures while calling LoadConfig", "err", err)
 		os.Exit(1)
 	}
+
+	// Logger init
+	config.LogInit()
 
 	// Database init
 	db, err := database.ConnectDB(cfg)
