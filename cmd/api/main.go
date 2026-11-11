@@ -26,7 +26,7 @@ func main() {
 	// Config init
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		slog.Error("godotenv fails to load .env file", "err", err)
+		slog.Error("error occures while calling LoadConfig", "err", err)
 		os.Exit(1)
 	}
 
