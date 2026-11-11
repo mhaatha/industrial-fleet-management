@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -41,7 +42,7 @@ func main() {
 
 	// Redis init
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     net.JoinHostPort(cfg.RedisHost, cfg.RedisPort),
+		Addr:     net.JoinHostPort(cfg.RedisHost, strconv.Itoa(cfg.RedisPort)),
 		Password: cfg.RedisPassword,
 		DB:       cfg.RedisDB,
 	})
