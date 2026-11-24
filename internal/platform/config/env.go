@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/mhaatha/industrial-fleet-management/internal/platform/apperror"
 )
 
 type Config struct {
@@ -148,7 +149,7 @@ func getEnvString(key, fallback string) (string, error) {
 	if value, exists := os.LookupEnv(key); exists {
 		if key == "POSTGRES_DB" || key == "POSTGRES_USER" || key == "POSTGRES_PASSWORD" {
 			if value == "" {
-				return "", fmt.Errorf("invalid configuration value: %v can not empty", key)
+				return "", fmt.Errorf("%w: %v can not be empty", apperror.ErrEnvRequired, key)
 			}
 		}
 
@@ -156,7 +157,7 @@ func getEnvString(key, fallback string) (string, error) {
 	} else {
 		if key == "POSTGRES_DB" || key == "POSTGRES_USER" || key == "POSTGRES_PASSWORD" {
 			if value == "" {
-				return "", fmt.Errorf("invalid configuration value: %v can not empty", key)
+				return "", fmt.Errorf("%w: %v can not be empty", apperror.ErrEnvRequired, key)
 			}
 		}
 	}
@@ -167,17 +168,17 @@ func getEnvInt(key string, fallback int) (int, error) {
 	if value, exists := os.LookupEnv(key); exists {
 		res, err := strconv.Atoi(value)
 		if err != nil {
-			return 0, fmt.Errorf("invalid configuration value: %v is not a valid %v", value, key)
+			return 0, fmt.Errorf("%w: '%v' is not a valid %v", apperror.ErrInvalidDataType, value, key)
 		}
 
 		// Port validation (recommendation: 1024 - 65535)
 		if strings.Contains(key, "PORT") && (res < 1024 || res > 65535) {
-			return 0, fmt.Errorf("invalid port value: port %v is invalid, please use port 1024 - 65535", res)
+			return 0, fmt.Errorf("%w: port '%v' is invalid, please use port 1024 - 65535", apperror.ErrOutOfRangePort, res)
 		}
 
 		// Redis DB value validation
 		if key == "REDIS_DB" && (res < 0 || res > 15) {
-			return 0, fmt.Errorf("invalid redis db value: %v is not a valid redis db (use 0-15)", res)
+			return 0, fmt.Errorf("%w: '%v' is not a valid redis db (use 0-15)", apperror.ErrOutOfRangeRedisDB, res)
 		}
 
 		return res, nil
