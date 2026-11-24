@@ -13,6 +13,14 @@ const (
 	CodeInternalError      = "INTERNAL_SERVER_ERROR"
 )
 
+var (
+	// Env errors
+	ErrEnvRequired       = errors.New("required configuration value")
+	ErrInvalidDataType   = errors.New("invalid data type")
+	ErrOutOfRangePort    = errors.New("port value is out of range")
+	ErrOutOfRangeRedisDB = errors.New("redis DB value is out of range")
+)
+
 type AppError struct {
 	Code       Code        `json:"code"`
 	Message    string      `json:"message"`
