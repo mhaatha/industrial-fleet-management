@@ -215,7 +215,7 @@ func TestLoadConfig(t *testing.T) {
 			redisPassword:    "test_password",
 			redisDB:          999999,
 			expectErr:        true,
-			expectedMatch:    apperror.ErrInvalidDataType,
+			expectedMatch:    apperror.ErrOutOfRangeRedisDB,
 		},
 	}
 
